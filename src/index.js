@@ -49,6 +49,7 @@ async function fetchImages(inputValue) {
 }
 
 async function onFormSubmit(e) {
+    try {
     gallery.innerHTML = ''
     e.preventDefault();
     const inputValue = e.currentTarget.elements.searchQuery.value;
@@ -56,19 +57,33 @@ async function onFormSubmit(e) {
         gallery.innerHTML = '';
         return;
     }
-    // if (gallery.innerHTML !== '') {
-    //     page++;
-    // }
     const fetch = await fetchImages(inputValue);
+    console.log("~ fetch", fetch)
     const render = await renderMarkup(fetch);
-    const totalHits = await render;
-    // .then(renderMarkup).catch(console.log);
+    const totalHits = await fetch.totalHits;
+    console.log("~ totalHits", totalHits)
     e.target.reset();
+    } catch {
+        Notify.failure('Ooooops')
+    }
+    // gallery.innerHTML = ''
+    // e.preventDefault();
+    // const inputValue = e.currentTarget.elements.searchQuery.value;
+    // if (inputValue === '') {
+    //     gallery.innerHTML = '';
+    //     return;
+    // }
+    // const fetch = await fetchImages(inputValue);
+    // console.log("~ fetch", fetch)
+    // const render = await renderMarkup(fetch);
+    // // const totalHits = await render;
+    // // .then(renderMarkup).catch(console.log);
+    // e.target.reset();
 }
 
 function renderMarkup(data) {
-    const test = data.hits;
-    const markup = test.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
+    const image = data.hits;
+    const markup = image.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
     return `<div class="photo-card"><a href="${largeImageURL}">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" /></a>
   <div class="info">
