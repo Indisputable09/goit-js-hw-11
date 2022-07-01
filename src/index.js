@@ -17,18 +17,18 @@ const options = {
 
 axios.defaults.baseURL = 'https://pixabay.com/api';
 
-// const observer = new IntersectionObserver((entries) => {
-//     entries.forEach(entry => {
-//         console.log(entry)
-//         if (entry.isIntersecting) {
-//             console.log('Good')
-//         }
-//     })
-// }, options);
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        console.log(entry)
+        if (entry.isIntersecting) {
+            console.log('Good')
+        }
+    })
+}, options);
 
-// const target = document.querySelector('.scroll-limit');
+const target = document.querySelector('.scroll-limit');
 
-// observer.observe(target);
+observer.observe(target);
 
 
 form.addEventListener('submit', onFormSubmit);
