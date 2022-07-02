@@ -1,84 +1,72 @@
 import { Notify } from "notiflix"
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
-// import debounce from 'lodash.debounce';
 import axios from 'axios';
-const lightBox = new SimpleLightbox(`.gallery div a`, { captionsData: `alt`, captionDelay: 250 });
+const lightBox = new SimpleLightbox(`.gallery div a`, { });
 
 const form = document.querySelector('.search__form');
-const inputValue = form.elements.searchQuery.value;
+// const inputValue = form.elements.searchQuery.value;
 const gallery = document.querySelector('.gallery');
 const URL_KEY = '27903219-6f010dc630c8173d81668507d';
 let page = 1;
 const options = {
     threshold: 1.0,
-    rootMargin: '200px',
+    rootMargin: '100px',
 };
 
-axios.defaults.baseURL = 'https://pixabay.com/api';
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        console.log(entry)
-        if (entry.isIntersecting) {
-            console.log('Good')
-        }
-    })
-}, options);
-
-const target = document.querySelector('.scroll-limit');
-
-observer.observe(target);
-
+// axios.defaults.baseURL = 'https://pixabay.com/api';
 
 form.addEventListener('submit', onFormSubmit);
 
 async function fetchImages(inputValue) {
-    const response = await axios.get('', {
+    const response = await axios.get('https://pixabay.com/api', {
         params: {
             key: URL_KEY,
             q: inputValue,
             image_type: 'photo',
             orientation: 'horizontal',
             safesearch: true,
-            per_page: '3',
+            per_page: '20',
             page: page,
         }
     });
+    page++;
     return response.data;
 }
 
 async function onFormSubmit(e) {
-    try {
-    gallery.innerHTML = ''
+    gallery.innerHTML = '';
     e.preventDefault();
+    page = 1;
     const inputValue = e.currentTarget.elements.searchQuery.value;
     if (inputValue === '') {
         gallery.innerHTML = '';
         return;
-    }
+        }
+    try {
     const fetch = await fetchImages(inputValue);
-    console.log("~ fetch", fetch)
     const render = await renderMarkup(fetch);
-    const totalHits = await fetch.totalHits;
-    console.log("~ totalHits", totalHits)
-    e.target.reset();
+    const totalHits = fetch.totalHits;
+    const observer = new IntersectionObserver((entries) => {
+    entries.forEach(async (entry) => {
+        if (entry.isIntersecting) {
+            // page++;
+                console.log(page)
+        }
+    })
+}, options);
+
+        observer.observe(document.querySelector('.scroll-limit'));
+        if (gallery.children.length < 500 && totalHits > 0) {
+        Notify.success(`Hooray! We found ${totalHits} images.`);
+        }
+        if (fetch.hits.length === 0) {
+            Notify.warning("Sorry, there are no images matching your search query. Please try again.")
+        }
+        e.target.reset();
     } catch {
         Notify.failure('Ooooops')
     }
-    // gallery.innerHTML = ''
-    // e.preventDefault();
-    // const inputValue = e.currentTarget.elements.searchQuery.value;
-    // if (inputValue === '') {
-    //     gallery.innerHTML = '';
-    //     return;
-    // }
-    // const fetch = await fetchImages(inputValue);
-    // console.log("~ fetch", fetch)
-    // const render = await renderMarkup(fetch);
-    // // const totalHits = await render;
-    // // .then(renderMarkup).catch(console.log);
-    // e.target.reset();
 }
 
 function renderMarkup(data) {
