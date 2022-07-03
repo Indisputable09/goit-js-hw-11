@@ -6,6 +6,8 @@ import axios from 'axios';
 const form = document.querySelector('.search__form');
 const gallery = document.querySelector('.gallery');
 const URL_KEY = '27903219-6f010dc630c8173d81668507d';
+const loadMore = document.querySelector('.load-more');
+
 let inputValue = '';
 let page = 1;
 const options = {
@@ -16,7 +18,7 @@ const options = {
 form.addEventListener('submit', onFormSubmit);
 
 axios.defaults.baseURL = 'https://pixabay.com/api/';
-async function fetchImages() {
+async function fetchImages(inputValue) {
     try {
         const response = await axios.get('', {
         params: {
@@ -25,13 +27,11 @@ async function fetchImages() {
             image_type: 'photo',
             orientation: 'horizontal',
             safesearch: true,
-            per_page: 20,
+            per_page: 8,
             page: page,
         }
     });
-        const result = await response.data;
-        observation();
-        return result;
+        return response.data;
     } catch (error) {
         console.log(error.message)
     }
@@ -39,9 +39,9 @@ async function fetchImages() {
 
 async function onFormSubmit(e) {
     try {
+    e.preventDefault();
     page = 1;
     gallery.innerHTML = '';
-    e.preventDefault();
     inputValue = e.currentTarget.elements.searchQuery.value;
     if (inputValue === '') {
         gallery.innerHTML = '';
@@ -69,19 +69,19 @@ async function renderMarkup(data) {
     const image = data.hits;
     const markup = image.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
         return `<div class="photo-card"><a class="image-link" href="${largeImageURL}">
-  <img src="${webformatURL}" alt="${tags}" loading="lazy" class="image"/>
+  <img src="${webformatURL}" alt="${tags}" loading="lazy"/>
   <div class="info">
     <p class="info-item">
-      <b>Likes</b>: ${likes}
+      <b>Likes</b> <span class="number-of">${likes}</span>
     </p>
     <p class="info-item">
-      <b>Views</b>: ${views}
+      <b>Views</b> <span class="number-of">${views}</span>
     </p>
     <p class="info-item">
-      <b>Comments</b>: ${comments}
+      <b>Comments</b> <span class="number-of">${comments}</span>
     </p>
     <p class="info-item">
-      <b>Downloads</b>: ${downloads}
+      <b>Downloads</b> <span class="number-of">${downloads}</span>
     </p>
   </div>
   </a>
