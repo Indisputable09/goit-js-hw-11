@@ -24,7 +24,7 @@ async function onFormSubmit(e) {
     try {
     // lightBox.refresh();
     e.preventDefault();
-    loadMore.classList.remove('is-hidden');
+    // loadMore.classList.add('is-hidden');
     gallery.innerHTML = '';
     pixabayImages.value = e.currentTarget.elements.searchQuery.value;
     pixabayImages.resetPage();
@@ -37,12 +37,14 @@ async function onFormSubmit(e) {
 
     const fetch = await pixabayImages.fetchImages(pixabayImages.value);
     const render = await renderMarkup(fetch);
+    loadMore.classList.remove('is-hidden');
     const totalHits = fetch.totalHits;
         
         if (gallery.children.length < 500 && totalHits > 0) {
         Notify.success(`Hooray! We found ${totalHits} images.`);
         }
         if (fetch.hits.length === 0) {
+            loadMore.classList.add('is-hidden');
         Notify.warning("Sorry, there are no images matching your search query. Please try again.")
         }
         e.target.reset();
