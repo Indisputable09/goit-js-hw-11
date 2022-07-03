@@ -160,10 +160,6 @@ img {
     background-color: rgba(255, 99, 71, 0.733) !important;
 }
 
-.test {
-    display: none;
-}
-
 .infinite-scroll__form {
     display: flex;
     justify-content: center;

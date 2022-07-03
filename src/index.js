@@ -9,7 +9,7 @@ const lightBox = new SimpleLightbox('.gallery div a', { captionDelay: 250, capti
 const form = document.querySelector('.search__form');
 const gallery = document.querySelector('.gallery');
 const observationTarget = document.querySelector('.scroll-limit');
-// const checkBoxScroll = document.querySelector('#infiniteScroll');
+const checkBoxScroll = document.querySelector('#infiniteScroll');
 
 const options = {
     threshold: 1.0,
@@ -37,7 +37,8 @@ async function onFormSubmit(e) {
 
     const fetch = await pixabayImages.fetchImages(pixabayImages.value);
     await renderMarkup(fetch);
-    // pixabayImages.loadMore.classList.remove('is-hidden');
+    pixabayImages.loadMore.classList.remove('is-hidden');
+
     const totalHits = fetch.totalHits;
 
         if (gallery.children.length < 500 && totalHits > 0) {
@@ -56,9 +57,11 @@ async function onFormSubmit(e) {
 }
 
 async function onLoadMoreClick() {
-const fetch = await pixabayImages.fetchImages(pixabayImages.value);
+    if (checkBoxScroll.checked !== true) {
+    const fetch = await pixabayImages.fetchImages(pixabayImages.value);
     await renderMarkup(fetch);
-    // pixabayImages.loadMore.classList.remove('is-hidden');
+    pixabayImages.loadMore.classList.remove('is-hidden');
+}
 }
 ;
 
@@ -92,9 +95,9 @@ async function renderMarkup(data) {
     const observer = new IntersectionObserver((entries) => {
     entries.forEach(async (entry) => {
         if (entry.isIntersecting) {
-            if (pixabayImages.summaryHits < 500 && pixabayImages.page > 1) {
-                const response = await pixabayImages.fetchImages(pixabayImages.value);
+            if (pixabayImages.summaryHits < 500 && pixabayImages.page > 1 && checkBoxScroll.checked === true) {
                 try {
+                    const response = await pixabayImages.fetchImages(pixabayImages.value);
                     await renderMarkup(response);
                     lightBox.refresh();
                     pixabayImages.incrementPage();
