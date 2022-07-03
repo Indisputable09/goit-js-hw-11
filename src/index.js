@@ -1,54 +1,42 @@
 import { Notify } from "notiflix"
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
-import axios from 'axios';
+import PixabayImages from './js/class';
+
+const pixabayImages = new PixabayImages();
+
+const lightBox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
 
 const form = document.querySelector('.search__form');
 const gallery = document.querySelector('.gallery');
-const URL_KEY = '27903219-6f010dc630c8173d81668507d';
 const loadMore = document.querySelector('.load-more');
 
-let inputValue = '';
-let page = 1;
+lightBox.on('show.simplelightbox');
+
 const options = {
     threshold: 1.0,
     rootMargin: '100px',
 };
 
 form.addEventListener('submit', onFormSubmit);
-
-axios.defaults.baseURL = 'https://pixabay.com/api/';
-async function fetchImages(inputValue) {
-    try {
-        const response = await axios.get('', {
-        params: {
-            key: URL_KEY,
-            q: inputValue,
-            image_type: 'photo',
-            orientation: 'horizontal',
-            safesearch: true,
-            per_page: 8,
-            page: page,
-        }
-    });
-        return response.data;
-    } catch (error) {
-        console.log(error.message)
-    }
-}
+loadMore.addEventListener('click', onLoadMoreClick)
 
 async function onFormSubmit(e) {
     try {
+    lightBox.refresh();
     e.preventDefault();
-    page = 1;
+    loadMore.classList.remove('is-hidden');
     gallery.innerHTML = '';
-    inputValue = e.currentTarget.elements.searchQuery.value;
-    if (inputValue === '') {
+    pixabayImages.value = e.currentTarget.elements.searchQuery.value;
+    pixabayImages.resetPage();
+        if (pixabayImages.value === '') {
+        loadMore.classList.add('is-hidden');
+        Notify.warning('If you want to search, than try to write something in the field.')
         gallery.innerHTML = '';
         return;
     }
-    
-    const fetch = await fetchImages(inputValue);
+
+    const fetch = await pixabayImages.fetchImages(pixabayImages.value);
     const render = await renderMarkup(fetch);
     const totalHits = fetch.totalHits;
         
@@ -64,6 +52,12 @@ async function onFormSubmit(e) {
         Notify.warning("We're sorry, but you've reached the end of search results.");
     }
 }
+
+function onLoadMoreClick() {
+lightBox.refresh();
+pixabayImages.fetchImages(pixabayImages.value).then(renderMarkup)
+}
+;
 
 async function renderMarkup(data) {
     const image = data.hits;
@@ -87,34 +81,18 @@ async function renderMarkup(data) {
   </a>
 </div>`
     }).join('');
-    // lightBox.refresh();
     gallery.insertAdjacentHTML("beforeend", markup);
 }
 
-// /////////////////
-// gallery.addEventListener('click', onGalleryClick);
-
-// function onGalleryClick(e) {
-//     console.log(e.target)
-//     const imgTarget = e.target.classList.contains('image');
-//     if (!imgTarget) {
-//         return;
-//     }
-    
-//     e.preventDefault();
-// };
-
-// const lightBox = new SimpleLightbox(`.gallery a`, { captionDelay: 250});
-
-function observation() {
-    const observer = new IntersectionObserver((entries) => {
-    entries.forEach(async (entry) => {
-        if (entry.isIntersecting && gallery.innerHTML !== '') {
-        page += 1;
-        const fetch = await fetchImages(inputValue);
-        const render = await renderMarkup(fetch);
-        }
-    })
-        }, options);
-            observer.observe(document.querySelector('.scroll-limit'));
-}
+// function observation() {
+//     const observer = new IntersectionObserver((entries) => {
+//     entries.forEach(async (entry) => {
+//         if (entry.isIntersecting && gallery.innerHTML !== '') {
+//         page += 1;
+//         const fetch = await fetchImages(inputValue);
+//         const render = await renderMarkup(fetch);
+//         }
+//     })
+//         }, options);
+//             observer.observe(document.querySelector('.scroll-limit'));
+// }
