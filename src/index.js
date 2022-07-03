@@ -4,14 +4,13 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 import PixabayImages from './js/class';
 
 const pixabayImages = new PixabayImages();
-
-const lightBox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
+const lightBox = new SimpleLightbox(`.gallery a`, { captionDelay: 250});
 
 const form = document.querySelector('.search__form');
 const gallery = document.querySelector('.gallery');
 const loadMore = document.querySelector('.load-more');
 
-lightBox.on('show.simplelightbox');
+// lightBox.on('show.simplelightbox');
 
 const options = {
     threshold: 1.0,
@@ -23,7 +22,7 @@ loadMore.addEventListener('click', onLoadMoreClick)
 
 async function onFormSubmit(e) {
     try {
-    lightBox.refresh();
+    // lightBox.refresh();
     e.preventDefault();
     loadMore.classList.remove('is-hidden');
     gallery.innerHTML = '';
@@ -54,7 +53,7 @@ async function onFormSubmit(e) {
 }
 
 function onLoadMoreClick() {
-lightBox.refresh();
+// lightBox.refresh();
 pixabayImages.fetchImages(pixabayImages.value).then(renderMarkup)
 }
 ;
@@ -83,6 +82,23 @@ async function renderMarkup(data) {
     }).join('');
     gallery.insertAdjacentHTML("beforeend", markup);
 }
+
+// /////////////////
+gallery.addEventListener('click', onGalleryClick);
+
+function onGalleryClick(e) {
+    console.log(e.target !== e.currentTarget)
+    console.log(e.currentTarget)
+
+    if (e.target !== e.currentTarget) {
+        lightBox.refresh();
+        lightBox.on('show.simplelightbox');
+        e.preventDefault();
+    }
+    
+};
+
+
 
 // function observation() {
 //     const observer = new IntersectionObserver((entries) => {
