@@ -4,59 +4,61 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 import PixabayImages from './js/class';
 
 const pixabayImages = new PixabayImages();
-const lightBox = new SimpleLightbox(`.gallery a`, { captionDelay: 250});
+const lightBox = new SimpleLightbox('.gallery div a', { captionDelay: 250, captionClass: 'caption--bg', captionsData: 'alt'});
 
 const form = document.querySelector('.search__form');
 const gallery = document.querySelector('.gallery');
-const loadMore = document.querySelector('.load-more');
-
-// lightBox.on('show.simplelightbox');
+const observationTarget = document.querySelector('.scroll-limit');
+// const checkBoxScroll = document.querySelector('#infiniteScroll');
 
 const options = {
     threshold: 1.0,
     rootMargin: '100px',
 };
 
+Notify.info('Please select whether you want to load images after clicking on a "Load more" button.')
+
 form.addEventListener('submit', onFormSubmit);
-loadMore.addEventListener('click', onLoadMoreClick)
+pixabayImages.loadMore.addEventListener('click', onLoadMoreClick);
+lightBox.on('show.simplelightbox');
 
 async function onFormSubmit(e) {
     try {
-    // lightBox.refresh();
     e.preventDefault();
-    // loadMore.classList.add('is-hidden');
     gallery.innerHTML = '';
     pixabayImages.value = e.currentTarget.elements.searchQuery.value;
     pixabayImages.resetPage();
         if (pixabayImages.value === '') {
-        loadMore.classList.add('is-hidden');
+        pixabayImages.loadMore.classList.add('is-hidden');
         Notify.warning('If you want to search, than try to write something in the field.')
         gallery.innerHTML = '';
         return;
     }
 
     const fetch = await pixabayImages.fetchImages(pixabayImages.value);
-    const render = await renderMarkup(fetch);
-    loadMore.classList.remove('is-hidden');
+    await renderMarkup(fetch);
+    // pixabayImages.loadMore.classList.remove('is-hidden');
     const totalHits = fetch.totalHits;
-        
+
         if (gallery.children.length < 500 && totalHits > 0) {
         Notify.success(`Hooray! We found ${totalHits} images.`);
         }
         if (fetch.hits.length === 0) {
-            loadMore.classList.add('is-hidden');
+        pixabayImages.loadMore.classList.add('is-hidden');
         Notify.warning("Sorry, there are no images matching your search query. Please try again.")
         }
         e.target.reset();
     } catch (error) {
+        pixabayImages.loadMore.classList.add('is-hidden');
         console.log(error.message)
         Notify.warning("We're sorry, but you've reached the end of search results.");
     }
 }
 
-function onLoadMoreClick() {
-// lightBox.refresh();
-pixabayImages.fetchImages(pixabayImages.value).then(renderMarkup)
+async function onLoadMoreClick() {
+const fetch = await pixabayImages.fetchImages(pixabayImages.value);
+    await renderMarkup(fetch);
+    // pixabayImages.loadMore.classList.remove('is-hidden');
 }
 ;
 
@@ -83,34 +85,28 @@ async function renderMarkup(data) {
 </div>`
     }).join('');
     gallery.insertAdjacentHTML("beforeend", markup);
+    lightBox.refresh();
 }
 
-// /////////////////
-gallery.addEventListener('click', onGalleryClick);
 
-function onGalleryClick(e) {
-    console.log(e.target !== e.currentTarget)
-    console.log(e.currentTarget)
+    const observer = new IntersectionObserver((entries) => {
+    entries.forEach(async (entry) => {
+        if (entry.isIntersecting) {
+            if (pixabayImages.summaryHits < 500 && pixabayImages.page > 1) {
+                const response = await pixabayImages.fetchImages(pixabayImages.value);
+                try {
+                    await renderMarkup(response);
+                    lightBox.refresh();
+                    pixabayImages.incrementPage();
+                    pixabayImages.smoothScroll();
+                } catch (error) {
+                    console.log(error);
+                };
+            } else if (pixabayImages.summaryHits > 500) {
+                Notify.warning("We're sorry, but you've reached the end of search results.");
+            }
+        }    
+    })
+}, options);
 
-    if (e.target !== e.currentTarget) {
-        lightBox.refresh();
-        lightBox.on('show.simplelightbox');
-        e.preventDefault();
-    }
-    
-};
-
-
-
-// function observation() {
-//     const observer = new IntersectionObserver((entries) => {
-//     entries.forEach(async (entry) => {
-//         if (entry.isIntersecting && gallery.innerHTML !== '') {
-//         page += 1;
-//         const fetch = await fetchImages(inputValue);
-//         const render = await renderMarkup(fetch);
-//         }
-//     })
-//         }, options);
-//             observer.observe(document.querySelector('.scroll-limit'));
-// }
+observer.observe(observationTarget);
