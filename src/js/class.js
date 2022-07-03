@@ -22,7 +22,7 @@ export default class PixabayImages {
             image_type: 'photo',
             orientation: 'horizontal',
             safesearch: true,
-            per_page: 12,
+            per_page: 40,
             page: this.page,
         }
         });
@@ -44,7 +44,7 @@ export default class PixabayImages {
 }
 
     incrementPage() {
-        this.summaryHits = this.page * 12;
+        this.summaryHits = this.page * 40;
         this.page += 1;
     }
 
