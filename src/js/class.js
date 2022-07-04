@@ -7,6 +7,7 @@ export default class PixabayImages {
     constructor() {
         this.inputValue = '';
         this.page = 1;
+        this.per_page = 40;
         this.summaryHits = 0;
         this.loadMore = document.querySelector('.load-more');
     }
@@ -21,7 +22,7 @@ export default class PixabayImages {
             image_type: 'photo',
             orientation: 'horizontal',
             safesearch: true,
-            per_page: 40,
+            per_page: this.per_page,
             page: this.page,
         }
         });
@@ -43,7 +44,7 @@ export default class PixabayImages {
 }
 
     incrementPage() {
-        this.summaryHits = this.page * 40;
+        this.summaryHits = this.page * this.per_page;
         this.page += 1;
     }
 
