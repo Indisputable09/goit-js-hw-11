@@ -14,7 +14,6 @@ export default class PixabayImages {
     async fetchImages() {
         try {
         this.loadMore.classList.add('is-hidden');
-        console.log(this)
         const response = await axios.get('', {
         params: {
             key: URL_KEY,

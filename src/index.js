@@ -13,14 +13,13 @@ const checkBoxScroll = document.querySelector('#infiniteScroll');
 
 const options = {
     threshold: 1.0,
-    rootMargin: '100px',
+    rootMargin: '200px',
 };
 
 Notify.info('Please select whether you want to load images with infinite scroll.')
 
 form.addEventListener('submit', onFormSubmit);
 pixabayImages.loadMore.addEventListener('click', onLoadMoreClick);
-lightBox.on('show.simplelightbox');
 
 async function onFormSubmit(e) {
     try {
@@ -57,9 +56,8 @@ async function onFormSubmit(e) {
 }
 
 async function onLoadMoreClick() {
-    if (checkBoxScroll.checked !== true) {
-    const fetch = await pixabayImages.fetchImages(pixabayImages.value);
-    await renderMarkup(fetch);
+    if (!checkBoxScroll.checked) {
+    getAndRender();
     pixabayImages.loadMore.classList.remove('is-hidden');
 }
 }
@@ -95,10 +93,9 @@ async function renderMarkup(data) {
     const observer = new IntersectionObserver((entries) => {
     entries.forEach(async (entry) => {
         if (entry.isIntersecting) {
-            if (pixabayImages.summaryHits < 500 && pixabayImages.page > 1 && checkBoxScroll.checked === true) {
+            if (pixabayImages.summaryHits < 500 && pixabayImages.page > 1 && checkBoxScroll.checked) {
                 try {
-                    const response = await pixabayImages.fetchImages(pixabayImages.value);
-                    await renderMarkup(response);
+                    getAndRender();
                     lightBox.refresh();
                     pixabayImages.incrementPage();
                     pixabayImages.smoothScroll();
@@ -113,3 +110,8 @@ async function renderMarkup(data) {
 }, options);
 
 observer.observe(observationTarget);
+
+async function getAndRender() {
+    const fetch = await pixabayImages.fetchImages(pixabayImages.value);
+    await renderMarkup(fetch);
+}
