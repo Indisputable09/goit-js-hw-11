@@ -16,7 +16,7 @@ const options = {
     rootMargin: '100px',
 };
 
-Notify.info('Please select whether you want to load images after clicking on a "Load more" button.')
+Notify.info('Please select whether you want to load images with infinite scroll.')
 
 form.addEventListener('submit', onFormSubmit);
 pixabayImages.loadMore.addEventListener('click', onLoadMoreClick);
