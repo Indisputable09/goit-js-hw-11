@@ -25,7 +25,7 @@ async function onFormSubmit(e) {
     try {
     e.preventDefault();
     gallery.innerHTML = '';
-    pixabayImages.value = e.currentTarget.elements.searchQuery.value;
+    pixabayImages.value = e.currentTarget.elements.searchQuery.value.trim();
     pixabayImages.resetPage();
         if (pixabayImages.value === '') {
         pixabayImages.loadMore.classList.add('is-hidden');
@@ -55,7 +55,7 @@ async function onFormSubmit(e) {
     }
 }
 
-async function onLoadMoreClick() {
+function onLoadMoreClick() {
     if (!checkBoxScroll.checked) {
     getAndRender();
     pixabayImages.loadMore.classList.remove('is-hidden');
@@ -102,8 +102,13 @@ async function renderMarkup(data) {
                 } catch (error) {
                     console.log(error);
                 };
-            } else if (pixabayImages.summaryHits > 500) {
+            }
+            if (!checkBoxScroll.checked && pixabayImages.page > 1) {
+                pixabayImages.loadMore.classList.remove('is-hidden');
+            }
+            if (pixabayImages.summaryHits > 500) {
                 Notify.warning("We're sorry, but you've reached the end of search results.");
+                pixabayImages.loadMore.classList.add('is-hidden');
             }
         }    
     })

@@ -35,7 +35,7 @@ export default class PixabayImages {
 
     smoothScroll() {
     
-    const { height: cardHeight } = gallery.firstElementChild.getBoundingClientRect();
+    const { height: cardHeight } = document.querySelector('.gallery').firstElementChild.getBoundingClientRect();
     window.scrollBy({
         top: cardHeight * 2,
         behavior: "smooth",
